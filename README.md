@@ -1,0 +1,174 @@
+# A sarcastic cooking assistant
+
+A React-based chat interface for an AI agent with client-side API integration.
+
+## Features
+
+- 🤖 Real AI integration with Anthropic Claude and OpenAI GPT-4
+- 🔐 Client-side API key management (stored in browser localStorage)
+- 💬 Clean, modern chat UI with markdown support
+- 📱 Responsive design for mobile and desktop
+- 🚀 One-command deployment to GitHub Pages
+
+## Quick Start
+
+### Using the Live App
+
+1. Visit the deployed URL (see deployment section)
+2. Click the "⚙️ Settings" button
+3. Select your AI provider (Anthropic or OpenAI)
+4. Enter your API key
+5. Click "Save & Start"
+6. Start chatting!
+
+Your API key is stored only in your browser's localStorage and is never sent to any server except the AI provider you selected.
+
+### Local Development
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+3. Open your browser to `http://localhost:5173`
+4. Configure your API key in the settings modal
+
+## How It Works
+
+The app uses client-side AI API calls:
+
+```javascript
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  if (!input.trim() || isLoading) return
+
+  const userMessage = { role: 'user', content: input }
+  setMessages(prev => [...prev, userMessage])
+  setInput('')
+  setIsLoading(true)
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': 'YOUR_API_KEY',
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 1024,
+        messages: [...messages, userMessage]
+      })
+    })
+
+    const data = await response.json()
+    const assistantMessage = {
+      role: 'assistant',
+      content: data.content[0].text
+    }
+    setMessages(prev => [...prev, assistantMessage])
+  } catch (error) {
+    console.error('Error:', error)
+  } finally {
+    setIsLoading(false)
+  }
+}
+```
+
+**Note:** API keys are stored securely in your browser's localStorage and sent directly to the AI provider. No backend server is needed!
+
+## Getting an API Key
+
+### Anthropic (Claude)
+1. Visit [console.anthropic.com](https://console.anthropic.com/)
+2. Sign up or log in
+3. Go to API Keys section
+4. Create a new API key
+5. Copy the key (starts with `sk-ant-`)
+
+### OpenAI (GPT-4)
+1. Visit [platform.openai.com](https://platform.openai.com/)
+2. Sign up or log in
+3. Go to API Keys section
+4. Create a new API key
+5. Copy the key (starts with `sk-`)
+
+## Deployment to GitHub Pages
+
+### Automatic Deployment (Recommended)
+
+If this app was created with the `--deploy` flag, it's already live on GitHub Pages!
+
+### Manual Deployment
+
+1. Using GitHub CLI (easiest):
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   gh repo create a-sarcastic-cooking-assistant --public --source=. --push
+   gh api --method POST repos/$(gh api user --jq .login)/a-sarcastic-cooking-assistant/pages -f build_type=workflow
+   ```
+
+2. Traditional method:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git branch -M main
+   git remote add origin https://github.com/YOUR_USERNAME/a-sarcastic-cooking-assistant.git
+   git push -u origin main
+   ```
+   Then enable GitHub Pages in repository settings (select "GitHub Actions" as source)
+
+3. The GitHub Actions workflow will automatically:
+   - Build your React app
+   - Deploy it to GitHub Pages
+   - Make it available at `https://YOUR_USERNAME.github.io/a-sarcastic-cooking-assistant/`
+
+## Project Structure
+
+```
+a-sarcastic-cooking-assistant/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml          # GitHub Actions deployment workflow
+├── public/                     # Static assets
+├── src/
+│   ├── components/
+│   │   └── ChatInterface.jsx   # Main chat component
+│   ├── styles/
+│   │   ├── App.css
+│   │   ├── ChatInterface.css
+│   │   └── index.css
+│   ├── App.jsx                 # Main app component
+│   └── main.jsx                # Entry point
+├── index.html
+├── package.json
+└── vite.config.js
+
+```
+
+## Customization
+
+- **Styling**: Modify the CSS files in `src/styles/` to match your brand
+- **Agent behavior**: Update the API call in `ChatInterface.jsx`
+- **Title**: Change the title in `index.html` and `App.jsx`
+
+## Built With
+
+- [React](https://react.dev/) - UI library
+- [Vite](https://vitejs.dev/) - Build tool
+- [React Markdown](https://github.com/remarkjs/react-markdown) - Markdown rendering
+- [GitHub Actions](https://github.com/features/actions) - CI/CD
+- [GitHub Pages](https://pages.github.com/) - Hosting
+
+## License
+
+This project was generated by the Agent-Deployer skill.
